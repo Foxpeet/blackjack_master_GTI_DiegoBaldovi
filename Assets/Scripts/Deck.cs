@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -49,7 +50,6 @@ public class Deck : MonoBehaviour
                 {
                     values[pos] = j + 1;
                 }
-                Debug.Log(pos + "--" + values[pos].ToString());
                 pos++;
             }
         }
@@ -99,6 +99,18 @@ public class Deck : MonoBehaviour
             /*TODO:
              * Si alguno de los dos obtiene Blackjack, termina el juego y mostramos mensaje
              */
+            if (dealer.GetComponent<CardHand>().points == 21)
+            {
+                finalMessage.text = "Blackjack from dealer";
+                hitButton.interactable = false;
+                stickButton.interactable = false;
+
+            } else if (player.GetComponent<CardHand>().points == 21)
+            {
+                finalMessage.text = "Blackjack from player";
+                hitButton.interactable = false;
+                stickButton.interactable = false;
+            }
         }
     }
 
