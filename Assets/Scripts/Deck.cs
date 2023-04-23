@@ -19,6 +19,8 @@ public class Deck : MonoBehaviour
     int cardIndex = 0;
 
     bool primeramano = true;
+    public Text textoPuntosDealer;
+    public Text textoPuntosPlayer;
 
     private void Awake()
     {
@@ -64,30 +66,20 @@ public class Deck : MonoBehaviour
          * El método Random.Range(0,n), devuelve un valor entre 0 y n-1
          * Si lo necesitas, puedes definir nuevos arrays.
          */
-        Sprite[] oldfaces = faces;
-        int[] oldvalues = values;
 
-        int newpos = 0;
-        List<int> usedpos = new List<int>();
-
-        for (int t=0; t<52; t++)
+        int randpos = 0;
+        System.Random random = new System.Random();
+        for (int t=51; t>0; t--)
         {
-            newpos = UnityEngine.Random.Range(0, 52);
-            if (t != 0)
-            {
-                while (usedpos.Contains(newpos))
-                {
-                    newpos = UnityEngine.Random.Range(0, 52);
-                }
-            }
+            randpos = random.Next(t+1);
 
-            usedpos.Add(newpos);
-
-            Sprite cardface = oldfaces[newpos];
-            int cardvalue = oldvalues[newpos];
-
+            Sprite cardface = faces[randpos];
+            faces[randpos] = faces[t];
             faces[t] = cardface;
-            values[t]= cardvalue;
+
+            int cardvalue = values[randpos];
+            values[randpos] = values[t];
+            values[t] = cardvalue;
 
         }
     }
@@ -143,6 +135,7 @@ public class Deck : MonoBehaviour
         player.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]/*,cardCopy*/);
         cardIndex++;
         CalculateProbabilities();
+        textoPuntosPlayer.text = "Tus puntos: " + player.GetComponent<CardHand>().points;
     }
 
     public void Hit()
@@ -150,6 +143,11 @@ public class Deck : MonoBehaviour
         /*TODO: 
          * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
          */
+        /*if (primeramano)
+        {
+            dealer.GetComponent<CardHand>().cards[0].GetComponent<CardModel>().ToggleFace(true);
+            primeramano = false;
+        }*/
 
         //Repartimos carta al jugador
         PushPlayer();
@@ -157,7 +155,15 @@ public class Deck : MonoBehaviour
         /*TODO:
          * Comprobamos si el jugador ya ha perdido y mostramos mensaje
          */
+        if (player.GetComponent<CardHand>().points>21)
+        {
+            finalMessage.text = "Perdiste";
+            hitButton.interactable = false;
+            stickButton.interactable = false;
 
+            textoPuntosDealer.text = "Puntos: " + dealer.GetComponent<CardHand>().points;
+            dealer.GetComponent<CardHand>().cards[0].GetComponent<CardModel>().ToggleFace(true);
+        }
     }
 
     public void Stand()
@@ -169,6 +175,7 @@ public class Deck : MonoBehaviour
         if (primeramano)
         {
             dealer.GetComponent<CardHand>().cards[0].GetComponent<CardModel>().ToggleFace(true);
+            primeramano = false;
         }
 
         /*TODO:
@@ -191,7 +198,14 @@ public class Deck : MonoBehaviour
                 finalMessage.text = "Gana el dealer";
                 hitButton.interactable = false;
                 stickButton.interactable = false;
-            } else if(puntosdealer < puntosplayer)
+            }
+            else if (puntosdealer > 21)
+            {
+                finalMessage.text = "Gana el jugador";
+                hitButton.interactable = false;
+                stickButton.interactable = false;
+            } 
+            else if(puntosdealer < puntosplayer)
             {
                 finalMessage.text = "Gana el jugador";
                 hitButton.interactable = false;
@@ -202,6 +216,7 @@ public class Deck : MonoBehaviour
                 hitButton.interactable = false;
                 stickButton.interactable = false;
             }
+            textoPuntosDealer.text = "Puntos: " + dealer.GetComponent<CardHand>().points;
         }
 
     }
@@ -211,6 +226,7 @@ public class Deck : MonoBehaviour
         hitButton.interactable = true;
         stickButton.interactable = true;
         finalMessage.text = "";
+        textoPuntosDealer.text = "Puntos:";
         player.GetComponent<CardHand>().Clear();
         dealer.GetComponent<CardHand>().Clear();
         cardIndex = 0;
