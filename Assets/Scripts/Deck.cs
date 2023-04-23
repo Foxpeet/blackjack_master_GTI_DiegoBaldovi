@@ -29,6 +29,23 @@ public class Deck : MonoBehaviour
 
     private void InitCardValues()
     {
+        int pos = 0;
+        for(int i = 0; i<4; i++)
+        {
+            for(int j = 0; j<13; j++)
+            {
+                if (j >= 10)
+                {
+                    values[pos] = 10;
+                }
+                else
+                {
+                    values[pos] = j+1;
+                }
+                Debug.Log(pos + "--" + values[pos].ToString());
+                pos++;
+            }
+        }
         /*TODO:
          * Asignar un valor a cada una de las 52 cartas del atributo "values".
          * En principio, la posición de cada valor se deberá corresponder con la posición de faces. 
