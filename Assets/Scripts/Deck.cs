@@ -18,6 +18,8 @@ public class Deck : MonoBehaviour
     public int[] values = new int[52];
     int cardIndex = 0;
 
+    bool primeramano = true;
+
     private void Awake()
     {
         InitCardValues();
@@ -164,11 +166,43 @@ public class Deck : MonoBehaviour
          * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
          */
 
+        if (primeramano)
+        {
+            dealer.GetComponent<CardHand>().cards[0].GetComponent<CardModel>().ToggleFace(true);
+        }
+
         /*TODO:
          * Repartimos cartas al dealer si tiene 16 puntos o menos
          * El dealer se planta al obtener 17 puntos o más
          * Mostramos el mensaje del que ha ganado
          */
+
+        if (dealer.GetComponent<CardHand>().points <= 16)
+        {
+            PushDealer();
+            Stand();
+        }
+        else
+        {
+            int puntosdealer = dealer.GetComponent<CardHand>().points;
+            int puntosplayer = player.GetComponent<CardHand>().points;
+            if(puntosdealer > puntosplayer && puntosdealer<=21)
+            {
+                finalMessage.text = "Gana el dealer";
+                hitButton.interactable = false;
+                stickButton.interactable = false;
+            } else if(puntosdealer < puntosplayer)
+            {
+                finalMessage.text = "Gana el jugador";
+                hitButton.interactable = false;
+                stickButton.interactable = false;
+            } else if(puntosdealer == puntosplayer)
+            {
+                finalMessage.text = "Empate";
+                hitButton.interactable = false;
+                stickButton.interactable = false;
+            }
+        }
 
     }
 
