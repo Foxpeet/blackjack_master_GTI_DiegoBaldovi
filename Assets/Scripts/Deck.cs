@@ -116,6 +116,192 @@ public class Deck : MonoBehaviour
          * - Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta
          * - Probabilidad de que el jugador obtenga más de 21 si pide una carta          
          */
+        string probDealerMasQueJugador = "Dealer mas puntos que jugador: " + dealerMasQueJugador() + "%";
+        string probSinPasarse = "Puntos del jugador entre 17 y 21: " + sinPasarse() + "%";
+        string probSePasa = "Jugador se pasa de 21 puntos: " + sePasa() + "%";
+        string textProb = probDealerMasQueJugador + "\n" + "\n" + probSinPasarse + "\n" + "\n" + probSePasa;
+        probMessage.text = textProb;
+    }
+
+    private string dealerMasQueJugador()
+    {
+        int casosFavorables = 0;
+        int[] cartasEnLaMesa = new int[cardIndex];
+
+        int puntuacionJugador = player.GetComponent<CardHand>().points;
+        int cartaDealer = dealer.GetComponent<CardHand>().cards[1].GetComponent<CardModel>().value;
+        int diferencia = puntuacionJugador - cartaDealer;
+
+        //guardamos todas las cartas que hay en la mesa
+        for (int i = 0; i <= cardIndex - 3; i++)
+        {
+            cartasEnLaMesa[i] = player.GetComponent<CardHand>().cards[i].GetComponent<CardModel>().value;
+        }
+        cartasEnLaMesa[cardIndex - 1] = dealer.GetComponent<CardHand>().cards[1].GetComponent<CardModel>().value;
+
+        if (diferencia < 0)
+        {
+            //0% de probabilidad de que el dealer tenga mas puntos que el jugador
+            return "0";
+        }
+
+        int valorCarta;
+
+        //comprobamos que cartas ya han salido y afectan al calculo restandolas de la cantidad de cartas favorables
+        for (int i = diferencia + 1; i <= 11; i++)
+        {
+            int cartasRepetidas = 0;
+
+            if (i == cartasEnLaMesa[0])
+            {
+                cartasRepetidas++;
+            }
+            if (i == cartasEnLaMesa[1])
+            {
+                cartasRepetidas++;
+            }
+            if (i == cartasEnLaMesa[2])
+            {
+                cartasRepetidas++;
+            }
+
+            if (i != 10)
+                casosFavorables = casosFavorables + (4 - cartasRepetidas);
+
+            if (i == 10)
+            {
+                casosFavorables = casosFavorables + (16 - cartasRepetidas);
+            }
+        }
+
+        //calculamos la probabilidad
+        float probabilidad = (float) casosFavorables / 49;
+        probabilidad = 1 - probabilidad;
+        probabilidad = probabilidad * 100;
+        return probabilidad.ToString();
+    }
+
+    private string sinPasarse()
+    {
+        int casosFavorables = 0;
+        int puntuacionJugador = player.GetComponent<CardHand>().points;
+        int[] cartasEnLaMesa = new int[cardIndex];
+
+        //guardamos las cartas que hay en la mesa
+        for (int i = 0; i <= cardIndex - 3; i++)
+        {
+            cartasEnLaMesa[i] = player.GetComponent<CardHand>().cards[i].GetComponent<CardModel>().value;
+        }
+        cartasEnLaMesa[cardIndex - 1] = dealer.GetComponent<CardHand>().cards[1].GetComponent<CardModel>().value;
+
+        //las cartas minimas y maximas que se pueden sacar para mantenerse entre 17 y 21
+        int cartaMinima = 17 - puntuacionJugador;
+        int cartaMaxima = 21 - puntuacionJugador;
+
+        //la valor de la minima carta posible es 1
+        if (cartaMinima <= 0)
+        {
+            cartaMinima = 1;
+        }
+
+        if (cartaMaxima <= 0)
+        {
+            //Hay 0% de probabilidad de sacar un numero para que la puntuacion este entre 17 y 21
+            return "0";
+        }
+        if (cartaMinima >= 11)
+        {
+            //Hay 100% de probabilidad de que tu puntuacion este entre 17 y 21 con la siguiente carta
+            return "100";
+        }
+
+        //recorremos todas las cartas con valores entre el minimo y maximo para mantanerse en el rango y quitamos las repetidas
+        for (int i = cartaMinima; i < cartaMaxima + 1; i++)
+        {
+            int cartasRepetidas = 0;
+            for (int j = 0; j < cartasEnLaMesa.Length; j++)
+            {
+                if (i == cartasEnLaMesa[j])
+                {
+                    cartasRepetidas++;
+                }
+            }
+            if (i != 10)
+            {
+                casosFavorables += (4 - cartasRepetidas);
+            }
+            else
+            {
+                casosFavorables += (16 - cartasRepetidas);
+            }
+        }
+
+        //calculamos la probabilidad
+        float probabilidad = (float)casosFavorables / (52-cardIndex);
+        probabilidad = probabilidad * 100;
+        return probabilidad.ToString();
+    }
+
+    private string sePasa()
+    {
+        int casosFavorables = 0;
+        int puntuacionJugador = player.GetComponent<CardHand>().points;
+        int[] cartasEnLaMesa = new int[cardIndex];
+
+        //guardamos las cartas que hay en la mesa
+        for (int i = 0; i <= cardIndex - 3; i++)
+        {
+            cartasEnLaMesa[i] = player.GetComponent<CardHand>().cards[i].GetComponent<CardModel>().value;
+        }
+        cartasEnLaMesa[cardIndex - 1] = dealer.GetComponent<CardHand>().cards[1].GetComponent<CardModel>().value;
+
+        int margen = 21 - puntuacionJugador;
+
+        if (puntuacionJugador == 21)
+        {
+            //100% de probabilidad de pasarte de 21 puntos
+            return "100";
+        }
+
+        if (margen >= 10)
+        {
+            //0% de probabilidad de pasarse
+            return "0";
+        }
+
+        //comprobamos las cartas que hay repetidas para no contarlas como casos favorables
+        for (int i = 1; i < margen + 1; i++)
+        {
+            int cartasRepe = 0;
+
+            if (i == cartasEnLaMesa[0])
+            {
+                cartasRepe++;
+            }
+            if (i == cartasEnLaMesa[1])
+            {
+                cartasRepe++;
+            }
+            if (i == cartasEnLaMesa[2])
+            {
+                cartasRepe++;
+            }
+
+            if (i != 10)
+            {
+                casosFavorables += (4 - cartasRepe);
+            }
+            else
+            {
+                casosFavorables += (16 - cartasRepe);
+            }
+        }
+
+        //calculamos la probabilidad
+        float probabilidad = (float)casosFavorables / (52-cardIndex);
+        probabilidad = 1 - probabilidad;
+        probabilidad = probabilidad * 100;
+        return probabilidad.ToString();
     }
 
     void PushDealer()
@@ -125,6 +311,12 @@ public class Deck : MonoBehaviour
          */
         dealer.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]);
         cardIndex++;
+
+        //solo se calculan las probabilidades cuando la primera mano ya esta en la mesa
+        if (cardIndex >= 4)
+        {
+            CalculateProbabilities();
+        }
     }
 
     void PushPlayer()
@@ -134,7 +326,11 @@ public class Deck : MonoBehaviour
          */
         player.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]/*,cardCopy*/);
         cardIndex++;
-        CalculateProbabilities();
+        //solo se calculan las probabilidades cuando la primera mano ya esta en la mesa
+        if(cardIndex>=4)
+        {
+            CalculateProbabilities();
+        }
         textoPuntosPlayer.text = "Tus puntos: " + player.GetComponent<CardHand>().points;
     }
 
